@@ -7,31 +7,50 @@
     android:gravity="center_vertical"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".Sign_Up">
+    tools:context=".Sign_Up"
+    android:background="@color/main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Register new account" />
+    <ImageView android:src="@drawable/logo"
+        android:layout_width="400dp"
+        android:layout_height="350dp"
+        android:layout_marginBottom="200dp"
+        android:layout_marginTop="-100dp"
+        android:layout_gravity="center_horizontal" />
 
     <EditText
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="-200dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
         android:hint="Email" />
 
     <EditText
         android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/white"
         android:hint="Password"
+        android:textColorHint="@color/white"
         android:inputType="textPassword" />
+
+    <CheckBox android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Password"
+        android:onClick="show_password"
+        android:textColor="@color/white"
+        android:buttonTint="@color/white"/>
 
     <Button
         android:id="@+id/register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Register" />
+        android:text="Register"
+        android:textColor="@color/mainDarker"
+        android:textStyle="bold"
+        android:backgroundTint="@color/white"/>
 
     <ProgressBar
         android:id="@+id/progressBar"

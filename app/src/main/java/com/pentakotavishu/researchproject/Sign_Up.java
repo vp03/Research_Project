@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -23,6 +25,7 @@ public class Sign_Up extends AppCompatActivity {
     private EditText emailTV, passwordTV;
     private Button regBtn;
     private ProgressBar progressBar;
+    private CheckBox checkbox;
 
     private FirebaseAuth mAuth;
     @Override
@@ -66,10 +69,15 @@ public class Sign_Up extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Registration successful!", Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(View.GONE);
 
-                            Intent intent = new Intent(Sign_Up.this, Login.class);
+                            Intent intent = new Intent(Sign_Up.this, Main_Activity.class);
                             startActivity(intent);
                         }
+                        else if (passwordTV.length()<6){
+                            Toast.makeText(getApplicationContext(), "Re-enter a password with minimum 6 characters", Toast.LENGTH_LONG).show();
+                        }
+
                         else {
+
                             Toast.makeText(getApplicationContext(), "Registration failed! Please try again later", Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(View.GONE);
                         }
@@ -82,5 +90,23 @@ public class Sign_Up extends AppCompatActivity {
         passwordTV = findViewById(R.id.password);
         regBtn = findViewById(R.id.register);
         progressBar = findViewById(R.id.progressBar);
+        checkbox = findViewById(R.id.checkbox);
+    }
+
+    public void show_password(View view) {
+        if (!checkbox.isChecked()) {
+
+            checkbox.setChecked(false);
+
+            passwordTV.setTransformationMethod(new PasswordTransformationMethod());
+
+        }
+        else if (checkbox.isChecked())
+        {
+            checkbox.setChecked(true);
+            passwordTV.setTransformationMethod(null);
+
+
+        }
     }
 }

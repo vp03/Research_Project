@@ -7,34 +7,57 @@
     android:gravity="center_vertical"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".Login">
+    tools:context=".Login"
+    android:background="@color/main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Account login"/>
+    <ImageView android:src="@drawable/logo"
+        android:layout_width="400dp"
+        android:layout_height="350dp"
+        android:layout_marginBottom="200dp"
+        android:layout_marginTop="-150dp"
+        android:layout_gravity="center_horizontal" />
+
     <EditText
         android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="-200dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
         android:hint="Email" />
 
     <EditText
         android:id="@+id/password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/white"
         android:hint="Password"
+        android:textColorHint="@color/white"
         android:inputType="textPassword" />
+
+    <CheckBox android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Password"
+        android:onClick="show_password"
+        android:textColor="@color/white"
+        android:buttonTint="@color/white"/>
 
     <Button
         android:id="@+id/login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:text="Login"
+        android:textColor="@color/mainDarker"
+        android:textStyle="bold"
+        android:backgroundTint="@color/white"/>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone" />
+        android:text="No account yet? Create one"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/white"
+        android:onClick="sign_up"/>
+
 </LinearLayout>
