@@ -42,11 +42,11 @@ public class Main_Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startbtn = (Button)findViewById(R.id.btnRecord);
-        stopbtn = (Button)findViewById(R.id.btnStop);
-        playbtn = (Button)findViewById(R.id.btnPlay);
-        stopplay = (Button)findViewById(R.id.btnStopPlay);
-        upload = (Button)findViewById(R.id.btnUpload);
+        startbtn = findViewById(R.id.btnRecord);
+        stopbtn = findViewById(R.id.btnStop);
+        playbtn = findViewById(R.id.btnPlay);
+        stopplay = findViewById(R.id.btnStopPlay);
+        upload = findViewById(R.id.btnUpload);
         stopbtn.setEnabled(false);
         playbtn.setEnabled(false);
         stopplay.setEnabled(false);
@@ -147,8 +147,9 @@ public class Main_Activity extends AppCompatActivity {
             // this will request for permission when permission is not true
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         }
-        Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
-        StorageReference notesRef = mStorageRef.child("notes/funnotes.txt");
+        //Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
+        Uri file = Uri.fromFile(new File(mFileName));
+        StorageReference notesRef = mStorageRef.child("audio/test.3gp");//could name the files based on time stamp
         System.out.println(file.toString());
         notesRef.putFile(file)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
