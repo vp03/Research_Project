@@ -12,10 +12,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -34,21 +37,24 @@ public class Main_Activity extends AppCompatActivity {
     private static String mFileName = null;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
     private StorageReference mStorageRef;
+    AppCompatActivity act;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startbtn = (Button)findViewById(R.id.btnRecord);
-        stopbtn = (Button)findViewById(R.id.btnStop);
-        playbtn = (Button)findViewById(R.id.btnPlay);
-        stopplay = (Button)findViewById(R.id.btnStopPlay);
-        upload = (Button)findViewById(R.id.btnUpload);
+        startbtn = findViewById(R.id.btnRecord);
+        stopbtn = findViewById(R.id.btnStop);
+        playbtn = findViewById(R.id.btnPlay);
+        stopplay = findViewById(R.id.btnStopPlay);
+        upload = findViewById(R.id.btnUpload);
         stopbtn.setEnabled(false);
         playbtn.setEnabled(false);
         stopplay.setEnabled(false);
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
         mFileName += "/AudioRecording.3gp";
         mStorageRef = FirebaseStorage.getInstance().getReference();
+        act = this;
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
 
         startbtn.setOnClickListener(new View.OnClickListener() {
@@ -128,34 +134,41 @@ public class Main_Activity extends AppCompatActivity {
                 //upload to Firebase
 
                 Toast.makeText(getApplicationContext(),"Upload Audio", Toast.LENGTH_SHORT).show();
+                upload();
 
-                if(ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED ||
-                        ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-                    // this will request for permission when permission is not true
-                    ActivityCompat.requestPermissions(getParent(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                }
-                Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
-                StorageReference notesRef = mStorageRef.child("notes/funnotes.txt");
 
-                notesRef.putFile(file);
-//                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                            @Override
-//                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                                // Get a URL to the uploaded content
-//                                Uri downloadUrl = taskSnapshot.getUploadSessionUri();
-//                                System.out.println("testing: "+ downloadUrl);
-//                            }
-//                        })
-//                        .addOnFailureListener(new OnFailureListener() {
-//                            @Override
-//                            public void onFailure(@NonNull Exception exception) {
-//                                // Handle unsuccessful uploads
-//                                System.out.println("testing: "+ exception);
-//                            }
-//                        });
             }
         });
     }
+    public void upload()
+    {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+            // this will request for permission when permission is not true
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
+        //Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
+        Uri file = Uri.fromFile(new File(mFileName));
+        StorageReference notesRef = mStorageRef.child("audio/test.3gp");//could name the files based on time stamp
+        System.out.println(file.toString());
+        notesRef.putFile(file)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get a URL to the uploaded content
+                        Uri downloadUrl = taskSnapshot.getUploadSessionUri();
+                        System.out.println("testing: "+ downloadUrl);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        System.out.println("testing: "+ exception);
+                    }
+                });
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
