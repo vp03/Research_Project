@@ -50,7 +50,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class Main_Activity extends AppCompatActivity {
-    private Button relocate;
+    private Button relocate,startbtn;
     private TextView textView;
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
@@ -78,6 +78,7 @@ public class Main_Activity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
         textView = findViewById(R.id.textView);
         relocate = findViewById(R.id.relocate);
+        startbtn = findViewById(R.id.button);
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -132,9 +133,19 @@ public class Main_Activity extends AppCompatActivity {
         });
     }
 
-    public void make_recording (){
+    public void make_recording (View view){
         Intent intent = new Intent(Main_Activity.this, My_Post.class);
         startActivity(intent);
+    }
+
+    public void startButton(View view){
+        textToSpeech.speak("Please tell me, how can I help you?", TextToSpeech.QUEUE_FLUSH, null, null);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        speechRecognizer.startListening(intent);
     }
 
     /*
