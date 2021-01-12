@@ -2,34 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <Button
-        android:id="@+id/post"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Make Post"
-        android:textColor="@color/mainDarker"
-        android:textStyle="bold"
-        android:backgroundTint="@color/white"
-        android:onClick="make_post"/>
-
-    <Button
-        android:id="@+id/speech"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Speech Recognizer"
-        android:textColor="@color/mainDarker"
-        android:layout_marginTop="50dp"
-        android:textStyle="bold"
-        android:backgroundTint="@color/white"
-        android:onClick="speech"/>
-
-    <TextView
-        android:id="@+id/textView"
+        android:id="@+id/btnRecord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hi user"
-        android:layout_margin="70dp"
-        android:textColor="@color/white" />
-
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="120dp"
+        android:text="Start Recording" />
+    <Button
+        android:id="@+id/btnStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:text="Stop Recording" />
+    <Button
+        android:id="@+id/btnPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:text="Play Recording" />
+    <Button
+        android:id="@+id/btnStopPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:text="Stop Playing" />
 </LinearLayout>
