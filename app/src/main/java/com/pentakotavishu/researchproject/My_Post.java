@@ -64,6 +64,7 @@ public class My_Post extends AppCompatActivity {
     private TextView textView;
     private Intent intent;
 
+        //hello
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
