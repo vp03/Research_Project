@@ -43,6 +43,13 @@ import androidx.core.app.ActivityCompat;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Objects;
+
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -54,6 +61,11 @@ public class Main_Activity extends AppCompatActivity {
     private TextView textView;
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
+    private SensorManager mSensorManager;
+    private long lastUpdate;
+    private float mAccel;
+    private float mAccelCurrent;
+    private float mAccelLast;
     private static final String LOG_TAG = "AudioRecording";
     private static String mFileName = null;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
@@ -79,6 +91,12 @@ public class Main_Activity extends AppCompatActivity {
         textView = findViewById(R.id.textView);
         relocate = findViewById(R.id.relocate);
         startbtn = findViewById(R.id.button);
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Objects.requireNonNull(mSensorManager).registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        mAccel = 10f;
+        mAccelCurrent = SensorManager.GRAVITY_EARTH;
+        mAccelLast = SensorManager.GRAVITY_EARTH;
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -89,7 +107,7 @@ public class Main_Activity extends AppCompatActivity {
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-
+        lastUpdate = 0;
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle params) {
@@ -118,7 +136,7 @@ public class Main_Activity extends AppCompatActivity {
                     string = matches.get(0);
                     textView.setText(string);
 
-                    if (string.equals("start recording")){
+                    if (string.equals("new recording")){
                         Intent intent = new Intent(Main_Activity.this, My_Post.class);
                         startActivity(intent);
                     }
@@ -131,6 +149,47 @@ public class Main_Activity extends AppCompatActivity {
             public void onEvent(int eventType, Bundle params) {
             }
         });
+    }
+    private final SensorEventListener mSensorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+            mAccelLast = mAccelCurrent;
+            mAccelCurrent = (float) Math.sqrt((double) (x * x + y * y + z * z));
+            float delta = mAccelCurrent - mAccelLast;
+            mAccel = mAccel * 0.9f + delta;
+            long curTime = System.currentTimeMillis();
+            if ((curTime - lastUpdate) > 300) {
+                lastUpdate = curTime;
+                if (mAccel > 15) {
+                    Toast.makeText(getApplicationContext(), "Shake event detected", Toast.LENGTH_SHORT).show();
+                    textToSpeech.speak("Please tell me, how can I help you?", TextToSpeech.QUEUE_FLUSH, null, null);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    speechRecognizer.startListening(intent);
+                }
+            }
+        }
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        super.onResume();
+    }
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(mSensorListener);
+        super.onPause();
     }
 
     public void make_recording (View view){
