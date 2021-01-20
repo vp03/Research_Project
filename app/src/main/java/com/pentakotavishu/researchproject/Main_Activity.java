@@ -136,7 +136,10 @@ public class Main_Activity extends AppCompatActivity {
                     string = matches.get(0);
                     textView.setText(string);
 
-                    if (string.equals("new recording")){
+                    if (string.equals("instructions")) {
+                        textToSpeech.speak("To make a new recording. Shake. Wait for the first beep, then say start recording", TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
+                    else if (string.equals("start recording")) {
                         Intent intent = new Intent(Main_Activity.this, My_Post.class);
                         startActivity(intent);
                     }
@@ -165,9 +168,9 @@ public class Main_Activity extends AppCompatActivity {
                 lastUpdate = curTime;
                 if (mAccel > 15) {
                     Toast.makeText(getApplicationContext(), "Shake event detected", Toast.LENGTH_SHORT).show();
-                    textToSpeech.speak("Please tell me, how can I help you?", TextToSpeech.QUEUE_FLUSH, null, null);
+                    textToSpeech.speak("Say instructions to get assistance.", TextToSpeech.QUEUE_FLUSH, null, null);
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(3000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -197,15 +200,6 @@ public class Main_Activity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void startButton(View view){
-        textToSpeech.speak("Please tell me, how can I help you?", TextToSpeech.QUEUE_FLUSH, null, null);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        speechRecognizer.startListening(intent);
-    }
 
     /*
     @Override
