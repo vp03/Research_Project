@@ -1,7 +1,12 @@
 package com.pentakotavishu.researchproject;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -43,6 +48,7 @@ import androidx.core.app.ActivityCompat;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -51,17 +57,23 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class My_Post extends AppCompatActivity {
     private Button startbtn, stopbtn, playbtn, stopplay, upload;
+    private TextView textView;
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
+    private boolean active;
     private static final String LOG_TAG = "AudioRecording";
     private static String mFileName = null;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
     private StorageReference mStorageRef;
     AppCompatActivity act;
+    private SensorManager mSensorManager;
+    private long lastUpdate;
+    private float mAccel;
+    private float mAccelCurrent;
+    private float mAccelLast;
 
     private SpeechRecognizer speechRecognizer;
     private TextToSpeech textToSpeech;
-    private TextView textView;
     private Intent intent;
 
 
@@ -74,17 +86,150 @@ public class My_Post extends AppCompatActivity {
         playbtn = findViewById(R.id.btnPlay);
         stopplay = findViewById(R.id.btnStopPlay);
         upload = findViewById(R.id.btnUpload);
+        textView = findViewById(R.id.textView);
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
         mFileName += "/AudioRecording.3gp";
         mStorageRef = FirebaseStorage.getInstance().getReference();
         act = this;
+        active = false;
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        ActivityCompat.requestPermissions(this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Objects.requireNonNull(mSensorManager).registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        mAccel = 10f;
+        mAccelCurrent = SensorManager.GRAVITY_EARTH;
+        mAccelLast = SensorManager.GRAVITY_EARTH;
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+            }
+
+        });
+        intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        lastUpdate = 0;
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+              //  textToSpeech.speak("Ready for speech", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+            @Override
+            public void onBeginningOfSpeech() {
+               // textToSpeech.speak("beginning of speech", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+            @Override
+            public void onRmsChanged(float rmsdB) {
+              //  textToSpeech.speak("rms changed", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+               // textToSpeech.speak("buffer received", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+            @Override
+            public void onEndOfSpeech() {
+               // textToSpeech.speak("end of speech", TextToSpeech.QUEUE_FLUSH, null, null);
+            }
+            @Override
+            public void onError(int error) {
+                if(active == true)
+                {
+                    active = false;
+                    stopbtn.setVisibility(View.INVISIBLE);
+                    startbtn.setVisibility(View.VISIBLE);
+                    playbtn.setVisibility(View.VISIBLE);
+                    upload.setVisibility(View.VISIBLE);
+                    mRecorder.stop();
+                    mRecorder.release();
+                    mRecorder = null;
+                    Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
+                }
+                else if (mPlayer.isPlaying())
+                {
+                    mPlayer.release();
+                    mPlayer = null;
+                    stopbtn.setVisibility(View.INVISIBLE);
+                    startbtn.setVisibility(View.VISIBLE);
+                    playbtn.setVisibility(View.VISIBLE);
+                    stopplay.setVisibility(View.INVISIBLE);
+                    upload.setVisibility(View.VISIBLE);
+                    Toast.makeText(getApplicationContext(),"Playing Audio Stopped", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(speechRecognizer.RESULTS_RECOGNITION);
+                String string = "";
+                textView.setText("");
+                if (matches != null) {
+                    string = matches.get(0);
+                    textView.setText(string);
+                    if (string.equals("instructions")) {
+                        textToSpeech.speak("To start a new recording. Shake. Wait for the first beep, then say start recording. Just shake to stop recording. Say play recording to hear what you recorded. Just shake to pause the play back. And say upload to upload your recording. ", TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
+                    else if (string.equals("start recording")) {
+                        if (CheckPermissions()) {
+                            active = true;
+                            startbtn.setVisibility(View.INVISIBLE);
+                            stopbtn.setVisibility(View.VISIBLE);
+                            stopplay.setVisibility(View.INVISIBLE);
+                            playbtn.setVisibility(View.INVISIBLE);
+                            upload.setVisibility(View.INVISIBLE);
+                            mRecorder = new MediaRecorder();
+                            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                            mRecorder.setOutputFile(mFileName);
+                            try {
+                                mRecorder.prepare();
+                            } catch (IOException e) {
+                                Log.e(LOG_TAG, "prepare() failed");
+                            }
+                            mRecorder.start();
+                            Toast.makeText(getApplicationContext(), "Recording Started", Toast.LENGTH_LONG).show();
+                            }
+                        else {
+                            RequestPermissions();
+                            }
+                        }
+                        else if (string.equals("play recording")) {
+                            stopplay.setVisibility(View.VISIBLE);
+                            playbtn.setVisibility(View.VISIBLE);
+                            upload.setVisibility(View.VISIBLE);
+                            startbtn.setVisibility(View.VISIBLE);
+                            mPlayer = new MediaPlayer();
+                            try {
+                                mPlayer.setDataSource(mFileName);
+                                mPlayer.prepare();
+                                mPlayer.start();
+                                Toast.makeText(getApplicationContext(), "Recording Started Playing", Toast.LENGTH_LONG).show();
+                            } catch (IOException e) {
+                                Log.e(LOG_TAG, "prepare() failed");
+                            }
+                        }
+                        else if (string.equals("upload")) {
+                            upload();
+                            Toast.makeText(getApplicationContext(), "Audio has been uploaded", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+            }
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
+        });
 
 
         startbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(CheckPermissions()) {
+                    active = true;
                     startbtn.setVisibility(View.INVISIBLE);
                     stopbtn.setVisibility(View.VISIBLE);
                     stopplay.setVisibility(View.INVISIBLE);
@@ -112,6 +257,7 @@ public class My_Post extends AppCompatActivity {
         stopbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                active = false;
                 stopbtn.setVisibility(View.INVISIBLE);
                 startbtn.setVisibility(View.VISIBLE);
                 playbtn.setVisibility(View.VISIBLE);
@@ -174,48 +320,6 @@ public class My_Post extends AppCompatActivity {
         });
         intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-/*
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-        speechRecognizer.setRecognitionListener(new RecognitionListener() {
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-            }
-            @Override
-            public void onBeginningOfSpeech() {
-            }
-            @Override
-            public void onRmsChanged(float rmsdB) {
-            }
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-            }
-            @Override
-            public void onEndOfSpeech() {
-            }
-            @Override
-            public void onError(int error) {
-            }
-            @Override
-            public void onResults(Bundle results) {
-                ArrayList<String> matches = results.getStringArrayList(speechRecognizer.RESULTS_RECOGNITION);
-                String string = "";
-                textView.setText("");
-                if (matches != null){
-                    string = matches.get(0);
-                    textView.setText(string);
-                    if (string.equals("start recording")){
-                        startbtn();//make a method for button and link it to an action listener
-                    }
-                }
-            }
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-            }
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-            }
-        });
- */
     }
 
 
@@ -271,5 +375,46 @@ public class My_Post extends AppCompatActivity {
     }
     private void RequestPermissions() {
         ActivityCompat.requestPermissions(My_Post.this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE}, REQUEST_AUDIO_PERMISSION_CODE);
+    }
+    private final SensorEventListener mSensorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+            mAccelLast = mAccelCurrent;
+            mAccelCurrent = (float) Math.sqrt((double) (x * x + y * y + z * z));
+            float delta = mAccelCurrent - mAccelLast;
+            mAccel = mAccel * 0.9f + delta;
+            long curTime = System.currentTimeMillis();
+            if ((curTime - lastUpdate) > 300) {
+                lastUpdate = curTime;
+                if (mAccel > 15) {
+                    Toast.makeText(getApplicationContext(), "Shake event detected", Toast.LENGTH_SHORT).show();
+                    textToSpeech.speak("Say instructions to get assistance.", TextToSpeech.QUEUE_FLUSH, null, null);
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    speechRecognizer.startListening(intent);
+                }
+            }
+        }
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        super.onResume();
+    }
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(mSensorListener);
+        super.onPause();
     }
 }

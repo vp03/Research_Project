@@ -57,7 +57,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class Main_Activity extends AppCompatActivity {
-    private Button relocate,startbtn;
+    private Button relocate;
     private TextView textView;
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
@@ -90,7 +90,6 @@ public class Main_Activity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
         textView = findViewById(R.id.textView);
         relocate = findViewById(R.id.relocate);
-        startbtn = findViewById(R.id.button);
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         Objects.requireNonNull(mSensorManager).registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
