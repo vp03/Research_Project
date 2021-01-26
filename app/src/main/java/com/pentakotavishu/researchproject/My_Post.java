@@ -223,6 +223,7 @@ public class My_Post extends AppCompatActivity {
             public void onEvent(int eventType, Bundle params) {
             }
         });
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
 
         startbtn.setOnClickListener(new View.OnClickListener() {
@@ -273,6 +274,7 @@ public class My_Post extends AppCompatActivity {
             public void onClick(View v) {
                 stopplay.setVisibility(View.VISIBLE);
                 playbtn.setVisibility(View.VISIBLE);
+                playbtn.setVisibility(View.INVISIBLE);
                 upload.setVisibility(View.VISIBLE);
                 startbtn.setVisibility(View.VISIBLE);
                 mPlayer = new MediaPlayer();
