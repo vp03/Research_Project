@@ -61,6 +61,7 @@ public class My_Post extends AppCompatActivity {
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
     private boolean active;
+    private boolean playing;
     private static final String LOG_TAG = "AudioRecording";
     private static String mFileName = null;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
@@ -92,6 +93,7 @@ public class My_Post extends AppCompatActivity {
         mStorageRef = FirebaseStorage.getInstance().getReference();
         act = this;
         active = false;
+        playing = false;
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         ActivityCompat.requestPermissions(this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
 
@@ -115,52 +117,30 @@ public class My_Post extends AppCompatActivity {
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
             @Override
             public void onReadyForSpeech(Bundle params) {
-              //  textToSpeech.speak("Ready for speech", TextToSpeech.QUEUE_FLUSH, null, null);
+                //  textToSpeech.speak("Ready for speech", TextToSpeech.QUEUE_FLUSH, null, null);
             }
             @Override
             public void onBeginningOfSpeech() {
-               // textToSpeech.speak("beginning of speech", TextToSpeech.QUEUE_FLUSH, null, null);
+                // textToSpeech.speak("beginning of speech", TextToSpeech.QUEUE_FLUSH, null, null);
             }
             @Override
             public void onRmsChanged(float rmsdB) {
-              //  textToSpeech.speak("rms changed", TextToSpeech.QUEUE_FLUSH, null, null);
+                //  textToSpeech.speak("rms changed", TextToSpeech.QUEUE_FLUSH, null, null);
             }
             @Override
             public void onBufferReceived(byte[] buffer) {
-               // textToSpeech.speak("buffer received", TextToSpeech.QUEUE_FLUSH, null, null);
+                // textToSpeech.speak("buffer received", TextToSpeech.QUEUE_FLUSH, null, null);
             }
             @Override
             public void onEndOfSpeech() {
-               // textToSpeech.speak("end of speech", TextToSpeech.QUEUE_FLUSH, null, null);
+                // textToSpeech.speak("end of speech", TextToSpeech.QUEUE_FLUSH, null, null);
             }
             @Override
             public void onError(int error) {
-                if(active == true)
-                {
-                    active = false;
-                    stopbtn.setVisibility(View.INVISIBLE);
-                    startbtn.setVisibility(View.VISIBLE);
-                    playbtn.setVisibility(View.VISIBLE);
-                    upload.setVisibility(View.VISIBLE);
-                    mRecorder.stop();
-                    mRecorder.release();
-                    mRecorder = null;
-                    Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
-                }
-                else if (mPlayer.isPlaying())
-                {
-                    mPlayer.release();
-                    mPlayer = null;
-                    stopbtn.setVisibility(View.INVISIBLE);
-                    startbtn.setVisibility(View.VISIBLE);
-                    playbtn.setVisibility(View.VISIBLE);
-                    stopplay.setVisibility(View.INVISIBLE);
-                    upload.setVisibility(View.VISIBLE);
-                    Toast.makeText(getApplicationContext(),"Playing Audio Stopped", Toast.LENGTH_SHORT).show();
-                }
             }
             @Override
             public void onResults(Bundle results) {
+
                 ArrayList<String> matches = results.getStringArrayList(speechRecognizer.RESULTS_RECOGNITION);
                 String string = "";
                 textView.setText("");
@@ -190,32 +170,35 @@ public class My_Post extends AppCompatActivity {
                             }
                             mRecorder.start();
                             Toast.makeText(getApplicationContext(), "Recording Started", Toast.LENGTH_LONG).show();
-                            }
+                        }
                         else {
                             RequestPermissions();
-                            }
-                        }
-                        else if (string.equals("play recording")) {
-                            stopplay.setVisibility(View.VISIBLE);
-                            playbtn.setVisibility(View.VISIBLE);
-                            upload.setVisibility(View.VISIBLE);
-                            startbtn.setVisibility(View.VISIBLE);
-                            mPlayer = new MediaPlayer();
-                            try {
-                                mPlayer.setDataSource(mFileName);
-                                mPlayer.prepare();
-                                mPlayer.start();
-                                Toast.makeText(getApplicationContext(), "Recording Started Playing", Toast.LENGTH_LONG).show();
-                            } catch (IOException e) {
-                                Log.e(LOG_TAG, "prepare() failed");
-                            }
-                        }
-                        else if (string.equals("upload")) {
-                            upload();
-                            Toast.makeText(getApplicationContext(), "Audio has been uploaded", Toast.LENGTH_SHORT).show();
                         }
                     }
+                    else if (string.equals("play recording")) {
+                        playing = true;
+                        stopplay.setVisibility(View.VISIBLE);
+                        playbtn.setVisibility(View.VISIBLE);
+                        upload.setVisibility(View.VISIBLE);
+                        startbtn.setVisibility(View.VISIBLE);
+                        mPlayer = new MediaPlayer();
+                        try {
+                            mPlayer.setDataSource(mFileName);
+                            mPlayer.prepare();
+                            mPlayer.start();
+                            Toast.makeText(getApplicationContext(), "Recording Started Playing", Toast.LENGTH_LONG).show();
+                        } catch (IOException e) {
+                            Log.e(LOG_TAG, "prepare() failed");
+                        }
+                    }
+                    else if (string.equals("upload")) {
+                        upload();
+                        Toast.makeText(getApplicationContext(), "Audio has been uploaded", Toast.LENGTH_SHORT).show();
+                    }
                 }
+
+
+            }
             @Override
             public void onPartialResults(Bundle partialResults) {
             }
@@ -272,6 +255,7 @@ public class My_Post extends AppCompatActivity {
         playbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                playing = true;
                 stopplay.setVisibility(View.VISIBLE);
                 playbtn.setVisibility(View.VISIBLE);
                 playbtn.setVisibility(View.INVISIBLE);
@@ -291,6 +275,7 @@ public class My_Post extends AppCompatActivity {
         stopplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                playing = false;
                 mPlayer.release();
                 mPlayer = null;
                 stopbtn.setVisibility(View.INVISIBLE);
@@ -381,6 +366,7 @@ public class My_Post extends AppCompatActivity {
     private final SensorEventListener mSensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
+
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
@@ -392,16 +378,45 @@ public class My_Post extends AppCompatActivity {
             if ((curTime - lastUpdate) > 300) {
                 lastUpdate = curTime;
                 if (mAccel > 15) {
-                    Toast.makeText(getApplicationContext(), "Shake event detected", Toast.LENGTH_SHORT).show();
-                    textToSpeech.speak("Say instructions to get assistance.", TextToSpeech.QUEUE_FLUSH, null, null);
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if(active == true)
+                    {
+                        Log.i("stopped at: ", "1");
+                        active = false;
+                        stopbtn.setVisibility(View.INVISIBLE);
+                        startbtn.setVisibility(View.VISIBLE);
+                        playbtn.setVisibility(View.VISIBLE);
+                        upload.setVisibility(View.VISIBLE);
+                        mRecorder.stop();
+                        mRecorder.release();
+                        mRecorder = null;
+                        Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
                     }
-                    speechRecognizer.startListening(intent);
+                    else if (playing == true)
+                    {
+                        Log.i("stopped at: ", "2");
+                        mPlayer.release();
+                        mPlayer = null;
+                        stopbtn.setVisibility(View.INVISIBLE);
+                        startbtn.setVisibility(View.VISIBLE);
+                        playbtn.setVisibility(View.VISIBLE);
+                        stopplay.setVisibility(View.INVISIBLE);
+                        upload.setVisibility(View.VISIBLE);
+                        Toast.makeText(getApplicationContext(),"Playing Audio Stopped", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        Log.i("stopped at: ", "3");
+                        Toast.makeText(getApplicationContext(), "Shake event detected", Toast.LENGTH_SHORT).show();
+                        textToSpeech.speak("Say instructions to get assistance.", TextToSpeech.QUEUE_FLUSH, null, null);
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        speechRecognizer.startListening(intent);
+                    }
                 }
             }
+
         }
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
