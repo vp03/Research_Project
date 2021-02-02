@@ -56,12 +56,14 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class My_Post extends AppCompatActivity {
-    private Button startbtn, stopbtn, playbtn, stopplay, upload;
+    private Button startbtn, stopbtn, playbtn, upload;
     private TextView textView;
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
     private boolean active;
     private boolean playing;
+    private int counter1;
+    private int counter2;
     private static final String LOG_TAG = "AudioRecording";
     private static String mFileName = null;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
@@ -83,9 +85,8 @@ public class My_Post extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
         startbtn = findViewById(R.id.btnRecord);
-        stopbtn = findViewById(R.id.btnStop);
+        //stopbtn = findViewById(R.id.btnRecord);
         playbtn = findViewById(R.id.btnPlay);
-        stopplay = findViewById(R.id.btnStopPlay);
         upload = findViewById(R.id.btnUpload);
         textView = findViewById(R.id.textView);
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -94,6 +95,8 @@ public class My_Post extends AppCompatActivity {
         act = this;
         active = false;
         playing = false;
+        counter1 = 0;
+        counter2 = 0;
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         ActivityCompat.requestPermissions(this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
 
@@ -153,11 +156,9 @@ public class My_Post extends AppCompatActivity {
                     else if (string.equals("start recording")) {
                         if (CheckPermissions()) {
                             active = true;
-                            startbtn.setVisibility(View.INVISIBLE);
-                            stopbtn.setVisibility(View.VISIBLE);
-                            stopplay.setVisibility(View.INVISIBLE);
-                            playbtn.setVisibility(View.INVISIBLE);
-                            upload.setVisibility(View.INVISIBLE);
+                            //startbtn.setVisibility(View.INVISIBLE);
+                            //playbtn.setVisibility(View.INVISIBLE);
+                            //upload.setVisibility(View.INVISIBLE);
                             mRecorder = new MediaRecorder();
                             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                             mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -177,10 +178,9 @@ public class My_Post extends AppCompatActivity {
                     }
                     else if (string.equals("play recording")) {
                         playing = true;
-                        stopplay.setVisibility(View.VISIBLE);
-                        playbtn.setVisibility(View.VISIBLE);
-                        upload.setVisibility(View.VISIBLE);
-                        startbtn.setVisibility(View.VISIBLE);
+                        //playbtn.setVisibility(View.VISIBLE);
+                        //upload.setVisibility(View.VISIBLE);
+                        //startbtn.setVisibility(View.VISIBLE);
                         mPlayer = new MediaPlayer();
                         try {
                             mPlayer.setDataSource(mFileName);
@@ -213,36 +213,50 @@ public class My_Post extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(CheckPermissions()) {
-                    active = true;
-                    startbtn.setVisibility(View.INVISIBLE);
-                    stopbtn.setVisibility(View.VISIBLE);
-                    stopplay.setVisibility(View.INVISIBLE);
-                    playbtn.setVisibility(View.INVISIBLE);
-                    upload.setVisibility(View.INVISIBLE);
-                    mRecorder = new MediaRecorder();
-                    mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                    mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                    mRecorder.setOutputFile(mFileName);
-                    try {
-                        mRecorder.prepare();
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "prepare() failed");
+                    counter1 = counter1 + 1;
+                    if ((counter1++ % 2) == 0) {
+                        active = true;
+                        //startbtn.setVisibility(View.INVISIBLE);
+                        startbtn.setText("Stop Recording");
+                        //playbtn.setVisibility(View.INVISIBLE);
+                        //upload.setVisibility(View.INVISIBLE);
+                        mRecorder = new MediaRecorder();
+                        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                        mRecorder.setOutputFile(mFileName);
+                        try {
+                            mRecorder.prepare();
+                        } catch (IOException e) {
+                            Log.e(LOG_TAG, "prepare() failed");
+                        }
+                        mRecorder.start();
+                        Toast.makeText(getApplicationContext(), "Recording Started", Toast.LENGTH_LONG).show();
                     }
-                    mRecorder.start();
-                    Toast.makeText(getApplicationContext(), "Recording Started", Toast.LENGTH_LONG).show();
+                    else if ((counter1++ % 2) == 1){
+                        active = false;
+                        startbtn.setText("Start Recording");
+                        startbtn.setVisibility(View.VISIBLE);
+                        playbtn.setVisibility(View.VISIBLE);
+                        upload.setVisibility(View.VISIBLE);
+                        mRecorder.stop();
+                        mRecorder.release();
+                        mRecorder = null;
+                        Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        RequestPermissions();
+                    }
                 }
-                else
-                {
-                    RequestPermissions();
-                }
+
             }
         });
+       /*
         stopbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 active = false;
-                stopbtn.setVisibility(View.INVISIBLE);
+                startbtn.setText("Start Recording");
                 startbtn.setVisibility(View.VISIBLE);
                 playbtn.setVisibility(View.VISIBLE);
                 upload.setVisibility(View.VISIBLE);
@@ -252,40 +266,57 @@ public class My_Post extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
             }
         });
+
+        */
+
+
         playbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playing = true;
-                stopplay.setVisibility(View.VISIBLE);
-                playbtn.setVisibility(View.VISIBLE);
-                playbtn.setVisibility(View.INVISIBLE);
-                upload.setVisibility(View.VISIBLE);
-                startbtn.setVisibility(View.VISIBLE);
-                mPlayer = new MediaPlayer();
-                try {
-                    mPlayer.setDataSource(mFileName);
-                    mPlayer.prepare();
-                    mPlayer.start();
-                    Toast.makeText(getApplicationContext(), "Recording Started Playing", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "prepare() failed");
+                if ((counter2++ % 2) == 0) {
+                    playing = true;
+                    //playbtn.setVisibility(View.VISIBLE);
+                    //playbtn.setVisibility(View.INVISIBLE);
+                    playbtn.setText("Stop Playing");
+                    //upload.setVisibility(View.VISIBLE);
+                    // startbtn.setVisibility(View.VISIBLE);
+                    mPlayer = new MediaPlayer();
+                    try {
+                        mPlayer.setDataSource(mFileName);
+                        mPlayer.prepare();
+                        mPlayer.start();
+                        Toast.makeText(getApplicationContext(), "Recording Started Playing", Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "prepare() failed");
+                    }
+                } else {
+                    playing = false;
+                    mPlayer.release();
+                    mPlayer = null;
+                    playbtn.setText("Start Playing");
+                    startbtn.setVisibility(View.VISIBLE);
+                    playbtn.setVisibility(View.VISIBLE);
+                    upload.setVisibility(View.VISIBLE);
+                    Toast.makeText(getApplicationContext(), "Playing Audio Stopped", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+        /*
         stopplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 playing = false;
                 mPlayer.release();
                 mPlayer = null;
-                stopbtn.setVisibility(View.INVISIBLE);
+                playbtn.setText("Start Playing");
                 startbtn.setVisibility(View.VISIBLE);
                 playbtn.setVisibility(View.VISIBLE);
-                stopplay.setVisibility(View.INVISIBLE);
                 upload.setVisibility(View.VISIBLE);
                 Toast.makeText(getApplicationContext(),"Playing Audio Stopped", Toast.LENGTH_SHORT).show();
             }
         });
+
+         */
 
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -309,7 +340,6 @@ public class My_Post extends AppCompatActivity {
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
     }
 
-
     public void upload()
     {
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED ||
@@ -319,7 +349,58 @@ public class My_Post extends AppCompatActivity {
         }
         //Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
         Uri file = Uri.fromFile(new File(mFileName));
-        StorageReference notesRef = mStorageRef.child("audio/test.3gp");//could name the files based on time stamp
+        StorageReference notesRef = mStorageRef.child("audio/test1.3gp");//could name the files based on time stamp
+        System.out.println(file.toString());
+
+        notesRef.putFile(file)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get a URL to the uploaded content
+                        Uri downloadUrl = taskSnapshot.getUploadSessionUri();
+                        System.out.println("testing: "+ downloadUrl);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        System.out.println("testing: "+ exception);
+                    }
+                });
+    }
+
+/*
+    public void upload()
+    {
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+            // this will request for permission when permission is not true
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
+//        Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
+//        StorageReference audioRef = mStorageRef.child("notes/tester.3gp");
+//
+//        audioRef.putFile(file);
+//                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                            @Override
+//                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                                // Get a URL to the uploaded content
+//                                Uri downloadUrl = taskSnapshot.getUploadSessionUri();
+//                                System.out.println("testing: "+ downloadUrl);
+//                            }
+//                        })
+//                        .addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception exception) {
+//                                // Handle unsuccessful uploads
+//                                System.out.println("testing: "+ exception);
+//                            }
+//                        });
+
+        //Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
+        Uri file = Uri.fromFile(new File(mFileName));
+        StorageReference notesRef = mStorageRef.child("audio/tester.3gp");//could name the files based on time stamp
         System.out.println(file.toString());
         notesRef.putFile(file)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -338,6 +419,8 @@ public class My_Post extends AppCompatActivity {
                     }
                 });
     }
+
+ */
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -382,7 +465,6 @@ public class My_Post extends AppCompatActivity {
                     {
                         Log.i("stopped at: ", "1");
                         active = false;
-                        stopbtn.setVisibility(View.INVISIBLE);
                         startbtn.setVisibility(View.VISIBLE);
                         playbtn.setVisibility(View.VISIBLE);
                         upload.setVisibility(View.VISIBLE);
@@ -396,10 +478,8 @@ public class My_Post extends AppCompatActivity {
                         Log.i("stopped at: ", "2");
                         mPlayer.release();
                         mPlayer = null;
-                        stopbtn.setVisibility(View.INVISIBLE);
                         startbtn.setVisibility(View.VISIBLE);
                         playbtn.setVisibility(View.VISIBLE);
-                        stopplay.setVisibility(View.INVISIBLE);
                         upload.setVisibility(View.VISIBLE);
                         Toast.makeText(getApplicationContext(),"Playing Audio Stopped", Toast.LENGTH_SHORT).show();
                     }
