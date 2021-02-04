@@ -51,7 +51,7 @@ public class Login extends AppCompatActivity {
     }
 
     private void loginUserAccount() {
-        progressBar.setVisibility(View.VISIBLE);
+        //progressBar.setVisibility(View.VISIBLE);
 
         String email, password;
         email = email1.getText().toString();
@@ -72,14 +72,14 @@ public class Login extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
+                            //progressBar.setVisibility(View.GONE);
 
                             Intent intent = new Intent(Login.this, Main_Activity.class);
                             startActivity(intent);
                         }
                         else {
                             Toast.makeText(getApplicationContext(), "Login failed! Please try again later", Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
+                            //progressBar.setVisibility(View.GONE);
                         }
                     }
                 });
@@ -91,7 +91,7 @@ public class Login extends AppCompatActivity {
         password1 = findViewById(R.id.password);
 
         login = findViewById(R.id.login);
-        progressBar = findViewById(R.id.progressBar);
+        //progressBar = findViewById(R.id.progressBar);
         checkbox = findViewById(R.id.checkbox);
     }
 

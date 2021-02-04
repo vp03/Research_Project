@@ -46,7 +46,7 @@ public class Sign_Up extends AppCompatActivity {
     }
 
     private void registerNewUser() {
-        progressBar.setVisibility(View.VISIBLE);
+        //progressBar.setVisibility(View.VISIBLE);
 
         String email, password;
         email = emailTV.getText().toString();
@@ -67,7 +67,7 @@ public class Sign_Up extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             Toast.makeText(getApplicationContext(), "Registration successful!", Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
+                            //progressBar.setVisibility(View.GONE);
 
                             Intent intent = new Intent(Sign_Up.this, Main_Activity.class);
                             startActivity(intent);
@@ -79,7 +79,7 @@ public class Sign_Up extends AppCompatActivity {
                         else {
 
                             Toast.makeText(getApplicationContext(), "Registration failed! Please try again later", Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
+                            //progressBar.setVisibility(View.GONE);
                         }
                     }
                 });
@@ -89,7 +89,7 @@ public class Sign_Up extends AppCompatActivity {
         emailTV = findViewById(R.id.email);
         passwordTV = findViewById(R.id.password);
         regBtn = findViewById(R.id.register);
-        progressBar = findViewById(R.id.progressBar);
+        //progressBar = findViewById(R.id.progressBar);
         checkbox = findViewById(R.id.checkbox);
     }
 
@@ -108,5 +108,9 @@ public class Sign_Up extends AppCompatActivity {
 
 
         }
+    }
+    public void login(View view) {
+        Intent intent = new Intent(Sign_Up.this, Login.class);
+        startActivity(intent);
     }
 }

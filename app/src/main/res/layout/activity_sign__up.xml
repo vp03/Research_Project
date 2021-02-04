@@ -14,7 +14,7 @@
         android:layout_width="400dp"
         android:layout_height="350dp"
         android:layout_marginBottom="200dp"
-        android:layout_marginTop="-100dp"
+        android:layout_marginTop="-150dp"
         android:layout_gravity="center_horizontal" />
 
     <EditText
@@ -52,10 +52,20 @@
         android:textStyle="bold"
         android:backgroundTint="@color/white"/>
 
-    <ProgressBar
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Already have an account? Sign in here"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/white"
+        android:onClick="login"/>
+
+<!--    <ProgressBar-->
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone" />
+
+
 
 </LinearLayout>
