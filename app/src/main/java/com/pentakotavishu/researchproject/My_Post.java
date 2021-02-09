@@ -12,6 +12,8 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -168,11 +170,19 @@ public class My_Post extends AppCompatActivity {
                             mRecorder.setOutputFile(mFileName);
                             try {
                                 mRecorder.prepare();
+
                             } catch (IOException e) {
                                 Log.e(LOG_TAG, "prepare() failed");
                             }
-                            mRecorder.start();
-                            Toast.makeText(getApplicationContext(), "Recording Started", Toast.LENGTH_LONG).show();
+                            final Handler handler = new Handler(Looper.getMainLooper());
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //Do something after 100ms
+                                    mRecorder.start();
+                                    Toast.makeText(getApplicationContext(), "Recording Started", Toast.LENGTH_LONG).show();
+                                }
+                            }, 1500);
                         }
                         else {
                             RequestPermissions();
@@ -242,19 +252,19 @@ public class My_Post extends AppCompatActivity {
                     }
                 }
                 else if ((counter1 % 2) == 0){
-                        active = false;
-                        startbtn.setText("Start Recording");
+                    active = false;
+                    startbtn.setText("Start Recording");
 //                        startbtn.setVisibility(View.VISIBLE);
 //                        playbtn.setVisibility(View.VISIBLE);
 //                        upload.setVisibility(View.VISIBLE);
-                        mRecorder.stop();
-                        mRecorder.release();
-                        mRecorder = null;
-                        Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
-                    }
+                    mRecorder.stop();
+                    mRecorder.release();
+                    mRecorder = null;
+                    Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
                 }
+            }
 
-            });
+        });
        /*
         stopbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -270,7 +280,6 @@ public class My_Post extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Recording Stopped", Toast.LENGTH_LONG).show();
             }
         });
-
         */
 
 
@@ -321,7 +330,6 @@ public class My_Post extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(),"Playing Audio Stopped", Toast.LENGTH_SHORT).show();
             }
         });
-
          */
 
         upload.setOnClickListener(new View.OnClickListener() {
@@ -404,7 +412,6 @@ public class My_Post extends AppCompatActivity {
 //                                System.out.println("testing: "+ exception);
 //                            }
 //                        });
-
         //Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
         Uri file = Uri.fromFile(new File(mFileName));
         StorageReference notesRef = mStorageRef.child("audio/tester.3gp");//could name the files based on time stamp
@@ -426,7 +433,6 @@ public class My_Post extends AppCompatActivity {
                     }
                 });
     }
-
  */
 
     @Override
@@ -472,7 +478,7 @@ public class My_Post extends AppCompatActivity {
                     {
                         Log.i("stopped at: ", "1");
                         active = false;
-                        playbtn.setText("Start Playing");
+                        startbtn.setText("Start Recording");
                         mRecorder.stop();
                         mRecorder.release();
                         mRecorder = null;
