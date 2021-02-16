@@ -39,10 +39,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentTransaction;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import android.content.Context;
@@ -66,6 +69,7 @@ public class Main_Activity extends AppCompatActivity {
     private float mAccel;
     private float mAccelCurrent;
     private float mAccelLast;
+    public List<String> input;
     private static final String LOG_TAG = "AudioRecording";
     private static String mFileName = null;
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
@@ -82,7 +86,9 @@ public class Main_Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        // Replace the contents of the container with the new fragment
+        refresh(ft);
         mStorageRef = FirebaseStorage.getInstance().getReference();
         act = this;
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -150,6 +156,15 @@ public class Main_Activity extends AppCompatActivity {
             public void onEvent(int eventType, Bundle params) {
             }
         });
+    }
+    public void refresh(FragmentTransaction ft) {
+        input = new ArrayList<>();
+        input.add("vishu");
+        input.add("navya");
+        ft.replace(R.id.your_placeholder, new Refresh_Fragment(input));
+        //ft.add(R.id.your_placeholder, new Refresh_Fragment(input));
+        // Complete the changes added above
+        ft.commit();
     }
     private final SensorEventListener mSensorListener = new SensorEventListener() {
         @Override

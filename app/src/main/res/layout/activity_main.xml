@@ -13,10 +13,16 @@
         android:textStyle="bold"
         android:textSize="60dp"
         android:backgroundTint="@color/main"
-        android:layout_marginTop="400dp"
+        android:layout_marginTop="50dp"
         android:layout_marginBottom="100dp"
         android:textColor="@color/white"/>
+    <FrameLayout
 
+        android:id="@+id/your_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="450dp">
+
+    </FrameLayout>
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"

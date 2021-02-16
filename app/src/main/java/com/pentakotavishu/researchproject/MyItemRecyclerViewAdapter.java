@@ -9,7 +9,12 @@ import android.widget.TextView;
 
 
 import java.util.List;
+import com.pentakotavishu.researchproject.dummy.DummyContent.DummyItem;
 
+/**
+ * {@link RecyclerView.Adapter} that can display a {@link DummyItem}.
+ * TODO: Replace the implementation with code for your data type.
+ */
 
 public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder> {
 
@@ -22,14 +27,15 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_refresh_, parent, false);
+                .inflate(R.layout.adapter, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final String name =  mValues.get(position);
-        holder.mContentView.setText(name);
+        if(holder.mContentView != null)
+            holder.mContentView.setText(name);
     }
 
     @Override

@@ -33,6 +33,7 @@ public class Refresh_Fragment extends Fragment {
     public Refresh_Fragment(List<String> random) {
         input = random;
     }
+
     public Refresh_Fragment() {
     }
 
