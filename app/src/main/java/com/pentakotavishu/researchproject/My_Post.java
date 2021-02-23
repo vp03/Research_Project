@@ -58,6 +58,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class My_Post extends AppCompatActivity {
+    private String audio_name;
     private Button startbtn, playbtn, upload;
     private TextView textView;
     private MediaRecorder mRecorder;
@@ -92,7 +93,10 @@ public class My_Post extends AppCompatActivity {
         upload = findViewById(R.id.btnUpload);
         textView = findViewById(R.id.textView);
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
-        mFileName += "/AudioRecording.3gp";
+        System.out.println("FILE NAME: " + mFileName);
+        String name = "" + System.currentTimeMillis();
+        //mFileName += "/" + name + ".3gp"; //on phone (internal storage -> /storage/emulated/0 )
+
         mStorageRef = FirebaseStorage.getInstance().getReference();
         act = this;
         active = false;
@@ -229,6 +233,8 @@ public class My_Post extends AppCompatActivity {
                 counter1 = counter1 + 1;
                 if ((counter1 % 2) == 1) {
                     if (CheckPermissions()) {
+                        audio_name = "" + System.currentTimeMillis();
+                        mFileName += "/" + audio_name + ".3gp";
                         active = true;
                         startbtn.setText("Stop Recording");
                         //startbtn.setVisibility(View.INVISIBLE);
@@ -363,8 +369,8 @@ public class My_Post extends AppCompatActivity {
         }
         //Uri file = Uri.fromFile(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/mynotes.txt"));
         Uri file = Uri.fromFile(new File(mFileName));
-        String name = "" + System.currentTimeMillis();
-        StorageReference notesRef = mStorageRef.child("audio/" + name + ".3gp");//could name the files based on time stamp
+        //String name = "" + System.currentTimeMillis();
+        StorageReference notesRef = mStorageRef.child("audio/" + audio_name + ".3gp");//could name the files based on time stamp
         System.out.println(file.toString());
 
         notesRef.putFile(file)
