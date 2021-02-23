@@ -8,12 +8,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import androidx.annotation.NonNull;
 
+
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 /**
  * A fragment representing a list of Items.
@@ -23,7 +36,7 @@ public class Refresh_Fragment extends Fragment {
     public RecyclerView recyclerView;
     public RecyclerView.Adapter mAdapter;
     public RecyclerView.LayoutManager layoutManager;
-    public  List<String> input;
+    public List<String> input;
     public SwipeRefreshLayout mySwipeRefreshLayout;
 
     /**
@@ -65,9 +78,10 @@ public class Refresh_Fragment extends Fragment {
         // EditText etFoo = (EditText) view.findViewById(R.id.etFoo);
     }
 
-    private void setUp(){
+    private void setUp() {
 
         // define an adapter
+        //includesForDownloadFiles();
         mAdapter = new com.pentakotavishu.researchproject.MyItemRecyclerViewAdapter(input);
         recyclerView.setAdapter(mAdapter);
 
@@ -78,6 +92,7 @@ public class Refresh_Fragment extends Fragment {
                             target) {
                         return false;
                     }
+
                     @Override
                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                         input.remove(viewHolder.getAdapterPosition());
@@ -101,5 +116,30 @@ public class Refresh_Fragment extends Fragment {
         setUp();
         System.out.println("refreshed");
         mySwipeRefreshLayout.setRefreshing(false); // Disables the refresh icon
+    }
+
+    public void includesForDownloadFiles() throws IOException {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        // [START download_create_reference]
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+
+
+        // [START download_to_memory]
+        StorageReference islandRef = storageRef.child("audio/1612465874583.3gp");
+
+        final long ONE_MEGABYTE = 1024 * 1024;
+        islandRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                // Data for "images/island.jpg" is returns, use this as needed
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+            }
+        });
     }
 }
