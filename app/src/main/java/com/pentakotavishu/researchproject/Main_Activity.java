@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -60,7 +61,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class Main_Activity extends AppCompatActivity {
-    private Button relocate;
+    private Button relocate, test;
     private TextView textView;
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
@@ -96,12 +97,15 @@ public class Main_Activity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
         textView = findViewById(R.id.textView);
         relocate = findViewById(R.id.relocate);
+        test = findViewById(R.id.test);
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         Objects.requireNonNull(mSensorManager).registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
         mAccel = 10f;
         mAccelCurrent = SensorManager.GRAVITY_EARTH;
         mAccelLast = SensorManager.GRAVITY_EARTH;
+
+
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -158,9 +162,16 @@ public class Main_Activity extends AppCompatActivity {
         });
     }
     public void refresh(FragmentTransaction ft) {
+        File f = new File(Environment.getExternalStorageDirectory(), "Download");
+        // Get all the names of the files present
+        // in the given directory
+        File[] files = f.listFiles();
         input = new ArrayList<>();
-        input.add("vishu");
-        input.add("navya");
+        for(int x=0; x < files.length; x++) {
+            if(files[x].getName().contains(".3gp")) {
+                input.add(files[x].getName());
+            }
+        }
         ft.replace(R.id.your_placeholder, new Refresh_Fragment(input));
         //ft.add(R.id.your_placeholder, new Refresh_Fragment(input));
         // Complete the changes added above
@@ -211,6 +222,59 @@ public class Main_Activity extends AppCompatActivity {
     public void make_recording (View view){
         Intent intent = new Intent(Main_Activity.this, My_Post.class);
         startActivity(intent);
+    }
+
+    public void test (View view)
+    {
+        /*
+        StorageReference riversRef = mStorageRef.child("audio/1614107369410.3gp");
+        File localFile = null;
+        try {
+            localFile = File.createTempFile("audio", "3gp");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        riversRef.getFile(localFile)
+                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        // Successfully downloaded data to local file
+                        // ...
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle failed download
+                // ...
+            }
+        });
+        */
+         downloadFile();
+    }
+    private void downloadFile() {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://research-project-98fa1.appspot.com/audio");
+        StorageReference islandRef = storageRef.child("1614545195685.3gp");
+
+        File rootPath = new File(Environment.getExternalStorageDirectory(), "Download");
+        if(!rootPath.exists()) {
+            rootPath.mkdirs();
+        }
+        String name = "Be_Heard/"; // +fireabse name;
+        final File localFile = new File(rootPath,"tester_file.3gp");
+
+        islandRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                Log.e("firebase ",";local tem file created  created " +localFile.toString());
+                //  updateDb(timestamp,localFile.toString(),position);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.e("firebase ",";local tem file not created  created " +exception.toString());
+            }
+        });
     }
 
     /*
