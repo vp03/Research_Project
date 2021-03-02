@@ -2,6 +2,7 @@ package com.pentakotavishu.researchproject;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -40,6 +41,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentTransaction;
 
 import java.io.File;
@@ -80,6 +82,7 @@ public class Main_Activity extends AppCompatActivity {
     private SpeechRecognizer speechRecognizer;
     private TextToSpeech textToSpeech;
     private Intent intent;
+    private MediaPlayer mediaPlayer1;
 
     //hello
 
@@ -104,6 +107,7 @@ public class Main_Activity extends AppCompatActivity {
         mAccel = 10f;
         mAccelCurrent = SensorManager.GRAVITY_EARTH;
         mAccelLast = SensorManager.GRAVITY_EARTH;
+        mediaPlayer1 = new MediaPlayer();
 
 
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -249,7 +253,7 @@ public class Main_Activity extends AppCompatActivity {
             }
         });
         */
-         downloadFile();
+        downloadFile();
     }
     private void downloadFile() {
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -275,6 +279,33 @@ public class Main_Activity extends AppCompatActivity {
                 Log.e("firebase ",";local tem file not created  created " +exception.toString());
             }
         });
+    }
+
+    public void play_recording(View view) {
+        TextView audio = (TextView) view;
+        audio.getText();
+
+        File audio_file = new File(Environment.getExternalStorageDirectory(), "Download");; // initialize Uri here
+
+        mediaPlayer1.setAudioAttributes(
+                new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+        );
+        Uri uri = FileProvider.getUriForFile(this.getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", audio_file);
+
+        try {
+            mediaPlayer1.setDataSource(getApplicationContext(), uri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            mediaPlayer1.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mediaPlayer1.start();
     }
 
     /*
