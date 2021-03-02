@@ -60,6 +60,21 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             player.start();
             //holder.mContentView.setMediaPlayer(name);
             */
+            //mr. kosek's help
+            /*
+            Uri myUri = rootpath; // initialize Uri here
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioAttributes(
+                    new AudioAttributes.Builder()
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .build()
+            );
+            mediaPlayer.setDataSource(getApplicationContext(), myUri);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+
+             */
             holder.mContentView.setText(name);
 
         }
