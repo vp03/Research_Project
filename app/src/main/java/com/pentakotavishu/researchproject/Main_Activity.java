@@ -174,6 +174,7 @@ public class Main_Activity extends AppCompatActivity {
         for(int x=0; x < files.length; x++) {
             if(files[x].getName().contains(".3gp")) {
                 input.add(files[x].getName());
+                System.out.println("ARRAY LIST SIZE: " + input.size());
             }
         }
         ft.replace(R.id.your_placeholder, new Refresh_Fragment(input));
@@ -258,7 +259,7 @@ public class Main_Activity extends AppCompatActivity {
     private void downloadFile() {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReferenceFromUrl("gs://research-project-98fa1.appspot.com/audio");
-        StorageReference islandRef = storageRef.child("1614545195685.3gp");
+        StorageReference islandRef = storageRef.child("1614879745143.3gp");
 
         File rootPath = new File(Environment.getExternalStorageDirectory(), "Download");
         if(!rootPath.exists()) {
@@ -287,14 +288,18 @@ public class Main_Activity extends AppCompatActivity {
 
         File audio_file = new File(Environment.getExternalStorageDirectory(), "Download");; // initialize Uri here
 
+        String filename = "Filename is: " + Environment.getExternalStorageDirectory() + "/Download";
+        System.out.println(audio.getText());
+        System.out.println(audio_file.getName());
+
         mediaPlayer1.setAudioAttributes(
                 new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .build()
         );
-        Uri uri = FileProvider.getUriForFile(this.getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", audio_file);
-
+        //Uri uri = FileProvider.getUriForFile(this.getApplicationContext(), BuildConfig.APPLICATION_ID, audio_file);
+        Uri uri = Uri.parse(Environment.getExternalStorageDirectory() + "/Download/" + audio.getText());
         try {
             mediaPlayer1.setDataSource(getApplicationContext(), uri);
         } catch (IOException e) {
