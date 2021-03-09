@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -63,7 +64,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class Main_Activity extends AppCompatActivity {
-    private Button relocate, test;
+    private Button relocate;
     private TextView textView;
     private MediaRecorder mRecorder;
     private MediaPlayer mPlayer;
@@ -78,6 +79,7 @@ public class Main_Activity extends AppCompatActivity {
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
     private StorageReference mStorageRef;
     AppCompatActivity act;
+    FragmentTransaction ft;
 
     private SpeechRecognizer speechRecognizer;
     private TextToSpeech textToSpeech;
@@ -90,9 +92,8 @@ public class Main_Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft = getSupportFragmentManager().beginTransaction();
         // Replace the contents of the container with the new fragment
-        refresh(ft);
         mStorageRef = FirebaseStorage.getInstance().getReference();
         act = this;
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -100,7 +101,6 @@ public class Main_Activity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
         textView = findViewById(R.id.textView);
         relocate = findViewById(R.id.relocate);
-        test = findViewById(R.id.test);
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         Objects.requireNonNull(mSensorManager).registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
@@ -164,15 +164,17 @@ public class Main_Activity extends AppCompatActivity {
             public void onEvent(int eventType, Bundle params) {
             }
         });
+        refresh(ft);
     }
     public void refresh(FragmentTransaction ft) {
+        downloadFile();
         File f = new File(Environment.getExternalStorageDirectory(), "Download");
         // Get all the names of the files present
         // in the given directory
         File[] files = f.listFiles();
         input = new ArrayList<>();
         for(int x=0; x < files.length; x++) {
-            if(files[x].getName().contains(".3gp")) {
+            if(files[x].getName().contains("Be_Heard_")) {
                 input.add(files[x].getName());
                 System.out.println("ARRAY LIST SIZE: " + input.size());
             }
@@ -229,57 +231,51 @@ public class Main_Activity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void test (View view)
-    {
-        /*
-        StorageReference riversRef = mStorageRef.child("audio/1614107369410.3gp");
-        File localFile = null;
-        try {
-            localFile = File.createTempFile("audio", "3gp");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        riversRef.getFile(localFile)
-                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        // Successfully downloaded data to local file
-                        // ...
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle failed download
-                // ...
-            }
-        });
-        */
-        downloadFile();
-    }
     private void downloadFile() {
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://research-project-98fa1.appspot.com/audio");
-        StorageReference islandRef = storageRef.child("1614879745143.3gp");
+        //StorageReference storageRef = storage.getReferenceFromUrl("gs://research-project-98fa1.appspot.com/audio");
+        //StorageReference islandRef = storageRef.child("1614879745143.3gp");
 
-        File rootPath = new File(Environment.getExternalStorageDirectory(), "Download");
-        if(!rootPath.exists()) {
-            rootPath.mkdirs();
-        }
-        String name = "Be_Heard/"; // +fireabse name;
-        final File localFile = new File(rootPath,"tester_file.3gp");
+        StorageReference storageRef = storage.getReferenceFromUrl("gs://research-project-98fa1.appspot.com/");
+        StorageReference islandRef = storageRef.child("audio");
+        islandRef.listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
+            @Override
+            public void onSuccess(ListResult listResult) {
 
-        islandRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                Log.e("firebase ",";local tem file created  created " +localFile.toString());
-                //  updateDb(timestamp,localFile.toString(),position);
+                for (StorageReference item : listResult.getItems()) {
+                    File rootPath = new File(Environment.getExternalStorageDirectory(), "Download");
+                    if(!rootPath.exists()) {
+                        rootPath.mkdirs();
+                    }
+                    String name = "Be_Heard_" + item.getName(); // +fireabse name;
+                    final File localFile = new File(rootPath, name);
+
+                    item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Log.e("firebase ",";local tem file created  created " +localFile.toString());
+                            //  updateDb(timestamp,localFile.toString(),position);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            Log.e("firebase ",";local tem file not created  created " +exception.toString());
+                        }
+                    });
+                }
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Log.e("firebase ",";local tem file not created  created " +exception.toString());
-            }
-        });
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Uh-oh, an error occurred!
+                    }
+                });
+
+    }
+    public void update()
+    {
+        refresh(ft);
     }
 
     public void play_recording(View view) {
