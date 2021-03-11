@@ -17,6 +17,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -24,6 +26,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
@@ -39,11 +42,15 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+
+
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -86,6 +93,7 @@ public class Main_Activity extends AppCompatActivity {
     private Intent intent;
     private MediaPlayer mediaPlayer1;
 
+    public SwipeRefreshLayout mySwipeRefreshLayout;
     //hello
 
     @Override
@@ -93,6 +101,26 @@ public class Main_Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ft = getSupportFragmentManager().beginTransaction();
+        //refresh(ft);
+
+        mySwipeRefreshLayout =  findViewById(R.id.swiperefresh);
+        mySwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                //write your code here.
+                //
+                refresh(ft);
+                mySwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+//        try {
+//            //set time in mili
+//            Thread.sleep(10000);
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
         // Replace the contents of the container with the new fragment
         mStorageRef = FirebaseStorage.getInstance().getReference();
         act = this;
@@ -108,6 +136,7 @@ public class Main_Activity extends AppCompatActivity {
         mAccelCurrent = SensorManager.GRAVITY_EARTH;
         mAccelLast = SensorManager.GRAVITY_EARTH;
         mediaPlayer1 = new MediaPlayer();
+
 
 
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -164,7 +193,7 @@ public class Main_Activity extends AppCompatActivity {
             public void onEvent(int eventType, Bundle params) {
             }
         });
-        refresh(ft);
+
     }
     public void refresh(FragmentTransaction ft) {
         downloadFile();
@@ -173,8 +202,10 @@ public class Main_Activity extends AppCompatActivity {
         // in the given directory
         File[] files = f.listFiles();
         input = new ArrayList<>();
+
+
         for(int x=0; x < files.length; x++) {
-            if(files[x].getName().contains("Be_Heard_")) {
+            if(files[x].getName().contains("Be_Heard")) {
                 input.add(files[x].getName());
                 System.out.println("ARRAY LIST SIZE: " + input.size());
             }
@@ -184,6 +215,8 @@ public class Main_Activity extends AppCompatActivity {
         // Complete the changes added above
         ft.commit();
     }
+
+
     private final SensorEventListener mSensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -231,7 +264,7 @@ public class Main_Activity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void downloadFile() {
+    public void downloadFile() {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         //StorageReference storageRef = storage.getReferenceFromUrl("gs://research-project-98fa1.appspot.com/audio");
         //StorageReference islandRef = storageRef.child("1614879745143.3gp");
@@ -271,6 +304,7 @@ public class Main_Activity extends AppCompatActivity {
                         // Uh-oh, an error occurred!
                     }
                 });
+
 
     }
     public void update()
