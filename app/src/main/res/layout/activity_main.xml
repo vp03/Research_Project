@@ -3,6 +3,8 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/main">
+
+
     <Button
         android:id="@+id/relocate"
         android:layout_width="wrap_content"
@@ -11,12 +13,16 @@
         android:text="+"
         android:onClick="make_recording"
         android:textStyle="bold"
-        android:textSize="60dp"
+        android:textSize="250dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="30dp"
+        android:paddingLeft="100dp"
+        android:paddingRight="100dp"
         android:backgroundTint="@color/main"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="100dp"
+        android:layout_marginTop="-20dp"
+        android:layout_marginBottom="10dp"
         android:textColor="@color/white"/>
-    
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swiperefresh"
         android:layout_width="match_parent"
@@ -34,11 +40,13 @@
 
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"/>
+
+
 
 </LinearLayout>
